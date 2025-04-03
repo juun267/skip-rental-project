@@ -2,66 +2,64 @@
 
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
-import { getSkips } from './api/skipApi';
+import { CARD_CONSTANTS } from './constants/cardConstants';
+import { API_CONSTANTS } from './constants/apiConstants';
 
-// Fallback local data in case the API call fails
-const fallbackSkipData = [
-  { id: 4, title: '4 Yards', name: '4 Yard Skip', price: 216, disabled: false, warnings: [] },
-  { id: 5, title: '5 Yards', name: '5 Yard Skip', price: 260, disabled: false, warnings: [] },
-  { id: 6, title: '6 Yards', name: '6 Yard Skip', price: 296, disabled: false, warnings: [] },
-  { id: 8, title: '8 Yards', name: '8 Yard Skip', price: 294, disabled: false, warnings: [] },
-  { id: 10, title: '10 Yards', name: '10 Yard Skip', price: 369, disabled: true, warnings: ['Private Property Only', 'Not Suitable for Heavy Waste'] },
-  { id: 12, title: '12 Yards', name: '12 Yard Skip', price: 407, disabled: true, warnings: ['Private Property Only', 'Not Suitable for Heavy Waste'] },
-];
-
-const App = () => {
+function App() {
   const [skips, setSkips] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selectedSkip, setSelectedSkip] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSkips = async () => {
       try {
-        const data = await getSkips();
-        // Map the API response to the format expected by the Card component.
-        const formattedData = data.map((item) => ({
-          id: item.id,
-          title: `${item.size} Yards`,
-          name: `${item.size} Yard Skip`,
-          price: item.price_before_vat,
-          disabled: !item.allowed_on_road || !item.allows_heavy_waste,
-          warnings: [
-            !item.allowed_on_road && 'Private Property Only',
-            !item.allows_heavy_waste && 'Not Suitable for Heavy Waste',
-          ].filter(Boolean),
-        }));
-        setSkips(formattedData);
-      } catch (error) {
-        console.error('Error fetching skip data, using fallback data.', error);
-        setSkips(fallbackSkipData);
+        const response = await fetch(`${API_CONSTANTS.BASE_URL}${API_CONSTANTS.ENDPOINTS.SKIPS}`, {
+          headers: API_CONSTANTS.HEADERS
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setSkips(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchSkips();
   }, []);
 
-  const handleSelect = (id) => {
-    if (id !== selected) {
-      setSelected(id);
-    }
+  const handleSkipSelect = (skipId) => {
+    setSelectedSkip(skipId);
   };
 
-  // Render API data if available; otherwise, fallback to local data.
-  const dataToRender = skips.length > 0 ? skips : fallbackSkipData;
+  if (loading) return <div className="text-center text-2xl mt-10">Loading...</div>;
+  if (error) return <div className="text-center text-red-500 text-2xl mt-10">Error: {error}</div>;
 
   return (
-    <div className="p-10 flex justify-center">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {dataToRender.map((skip) => (
-          <Card key={skip.id} skip={skip} selected={selected} onSelect={handleSelect} />
-        ))}
+    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-8">Select Your Skip</h1>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {skips.map((skip) => (
+            <Card
+              key={skip.id}
+              skip={skip}
+              selected={selectedSkip}
+              onSelect={handleSkipSelect}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default App;

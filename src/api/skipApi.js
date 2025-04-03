@@ -1,18 +1,22 @@
 // src/api/skipApi.js
+import { API_CONSTANTS } from '../constants/apiConstants';
+
+const API_URL = `${API_CONSTANTS.ENDPOINTS.SKIPS}?postcode=${API_CONSTANTS.QUERY.POSTCODE}&area=${API_CONSTANTS.QUERY.AREA}`;
 
 export const getSkips = async () => {
-  const API_URL = "https://app.wewantwaste.co.uk/api/skips/by-location?postcode=NR32&area=Lowestoft";
-
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      headers: API_CONSTANTS.HEADERS
+    });
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching skip data:", error);
-    // Optionally, return default/fallback data or rethrow the error.
+    console.error('Error fetching skips:', error);
     throw error;
   }
 };
