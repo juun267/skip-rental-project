@@ -2,64 +2,62 @@
 
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
-import { CARD_CONSTANTS } from './constants/cardConstants';
-import { API_CONSTANTS } from './constants/apiConstants';
+import { getSkips } from './api/skipApi';
 
-function App() {
+const App = () => {
   const [skips, setSkips] = useState([]);
-  const [selectedSkip, setSelectedSkip] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSkips = async () => {
       try {
-        const response = await fetch(`${API_CONSTANTS.BASE_URL}${API_CONSTANTS.ENDPOINTS.SKIPS}`, {
-          headers: API_CONSTANTS.HEADERS
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        setSkips(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        const data = await getSkips();
+        // Map the API response to the format expected by the Card component
+        const formattedData = data.map((item) => ({
+          id: item.id,
+          title: `${item.size} Yards`,
+          name: `${item.size} Yard Skip`,
+          price: item.price_before_vat ?? 0.0,
+          disabled: !item.allows_heavy_waste,
+          warnings: [
+            !item.allowed_on_road && 'Private Property Only',
+            !item.allows_heavy_waste && 'Not Suitable for Heavy Waste',
+          ].filter(Boolean),
+        }));
+        setSkips(formattedData);
+      } catch (error) {
+        console.error('Error fetching skip data:', error);
+        setError('Failed to load skip data. Please try again later.');
       }
     };
 
     fetchSkips();
   }, []);
 
-  const handleSkipSelect = (skipId) => {
-    setSelectedSkip(skipId);
+  const handleSelect = (id) => {
+    if (id !== selected) {
+      setSelected(id);
+    }
   };
 
-  if (loading) return <div className="text-center text-2xl mt-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 text-2xl mt-10">Error: {error}</div>;
+  if (error) {
+    return (
+      <div className="p-10 flex justify-center items-center min-h-screen">
+        <div className="text-red-500 text-xl">{error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-8">Select Your Skip</h1>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {skips.map((skip) => (
-            <Card
-              key={skip.id}
-              skip={skip}
-              selected={selectedSkip}
-              onSelect={handleSkipSelect}
-            />
-          ))}
-        </div>
+    <div className="p-10 flex justify-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {skips.map((skip) => (
+          <Card key={skip.id} skip={skip} selected={selected} onSelect={handleSelect} />
+        ))}
       </div>
     </div>
   );
-}
+};
 
 export default App;

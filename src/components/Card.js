@@ -53,7 +53,7 @@ const Card = ({ skip, selected, onSelect }) => {
         />
 
         {/* Warning overlay for disabled skips */}
-        {skip.disabled && (
+        {(
           <div className="absolute inset-0 bg-black bg-opacity-50">
             {/* Warning messages */}
             <div className="absolute bottom-4 left-4 space-y-2">
@@ -110,7 +110,7 @@ const Card = ({ skip, selected, onSelect }) => {
         <p className="text-gray-400 text-lg pt-3">{CARD_CONSTANTS.TEXT.HIRE_PERIOD}</p>
         <div className="pt-3">
           <span className="text-blue-800 font-bold text-3xl">£{skip.price}</span>
-          <span className="text-lg pl-1">{CARD_CONSTANTS.TEXT.PRICE_PERIOD}</span>
+          <span className="text-lg pl-2">{CARD_CONSTANTS.TEXT.PRICE_PERIOD}</span>
         </div>
 
         {/* Action button */}
