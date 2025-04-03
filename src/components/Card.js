@@ -8,7 +8,7 @@ const Card = ({ skip, selected, onSelect }) => {
       onClick={() => !skip.disabled && onSelect(skip.id)} // Disable click for disabled cards
       className={`bg-gray-800 text-white rounded-lg shadow-lg cursor-pointer transition-all p-8 ${
         selected === skip.id ? 'border-2 border-blue-500' : 'border-2 border-gray-500'
-      } ${skip.disabled ? 'bg-gray-600 cursor-not-allowed' : ''}`} // Apply disabled state to whole card
+      } ${skip.disabled ? 'bg-gray-600 cursor-not-allowed' : ''} max-w-xs sm:max-w-sm md:max-w-md`} // Added max-width classes for responsiveness
     >
       <div className="relative">
         {/* Yard Text */}
@@ -16,7 +16,7 @@ const Card = ({ skip, selected, onSelect }) => {
           {skip.title}
         </div>
         <img
-          className="w-72 h-48 object-cover rounded-t-lg"
+          className="w-full h-48 object-cover rounded-t-lg md:h-64" // Responsive image size
           src="https://images.unsplash.com/photo-1590496793929-36417d3117de?q=80&w=800"
           alt={skip.name}
         />
@@ -30,19 +30,21 @@ const Card = ({ skip, selected, onSelect }) => {
 
         {/* Disabled Card Warnings */}
         {skip.disabled && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center text-white">
+          <div className="absolute inset-0 bg-black bg-opacity-50">
             {/* Vertical Textboxes */}
-            <div className="space-y-2">
+            <div className="absolute bottom-4 left-4 space-y-2">
               {skip.warnings.map((warning, index) => (
                 <div
                   key={index}
-                  className={`bg-black text-white p-1 rounded-md flex items-center ${
-                    warning === 'Not Suitable for Heavy Waste' ? 'text-orange-400' : 'text-yellow-400'
+                  className={`bg-black p-1 rounded-md flex items-center ${
+                    warning === 'Not Suitable for Heavy Waste' ? 'text-orange-600' : 'text-yellow-400'
                   }`}
                 >
-                  <span className={`mr-2 ${
-                    warning === 'Not Suitable for Heavy Waste' ? 'text-orange-400' : 'text-yellow-400'
-                  }`}>
+                  <span
+                    className={`mr-2 ${
+                      warning === 'Not Suitable for Heavy Waste' ? 'text-orange-600' : 'text-yellow-400'
+                    }`}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -74,7 +76,7 @@ const Card = ({ skip, selected, onSelect }) => {
 
       <div className="pt-5">
         <div className="flex justify-between items-center">
-          <h3 className="text-2xl font-semibold">{skip.name}</h3>
+          <h3 className="text-xl sm:text-2xl font-semibold">{skip.name}</h3>
         </div>
         <p className="text-gray-400 text-lg pt-3">14 day hire period</p>
         <div className="pt-3">
